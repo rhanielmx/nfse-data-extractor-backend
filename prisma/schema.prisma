@@ -3,12 +3,27 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+enum DocumentType {
+  CONTRATO                                  @map("148")
+  FATURA                                    @map("31")
+  NFE_SERVICOS_TERCEIROS_AVULSA             @map("150")
+  NFSE_SERVICOS_TERCEIROS                   @map("77")
+  NFSE_SERVICOS_TERCEIROS_ELETRONICA        @map("219")
+  NOTA_DE_DEBITO                            @map("154")
+  NOTA_FISCAL_DE_SERVICO_DE_COMUNICACAO     @map("147")
+  NOTA_FISCAL_DE_SERVICO_DE_TELECOMUNICACAO @map("221")
+  NOTA_FISCAL_DE_SERVICOS_SERIE_A           @map("117")
+  NOTA_FISCAL_DE_SERVICOS_DE_TERCEIROS      @map("16")
+  RECIBO                                    @map("4")
+  RECIDO_DE_TERCEIROS                       @map("5")
+}
+
 model Receipt {
-  id                  String    @id @default(uuid())
+  id                  String        @id @default(uuid())
   filename            String?
   status              String
   image               String?
@@ -17,9 +32,10 @@ model Receipt {
   receiptValueInCents Int?
   issValueInCents     Int?
   receiptNumber       String?
-  documentType        String?
+  documentType        DocumentType?
   issueDate           DateTime?
   accrualDate         DateTime?
 
+  // @@unique([supplier, receiptNumber])
   @@map("receipts")
 }

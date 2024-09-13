@@ -1,19 +1,58 @@
-import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs'
-pdfjs.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/legacy/build/pdf.worker.mjs'
-import { createCanvas } from 'canvas'
-import sharp from 'sharp'
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
+import { createCanvas } from 'canvas';
+import sharp from 'sharp';
 import FormData from 'form-data';
+import { fakerPT_BR as faker } from '@faker-js/faker'
+pdfjs.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/legacy/build/pdf.worker.mjs'
+import { DocumentType } from '@prisma/client'
 
-import { fromBase64, fromBuffer, fromPath } from 'pdf2pic'
-import fs from 'node:fs'
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import type { MultipartFile } from '@fastify/multipart';
-import { z } from 'zod';
-import type { Options } from 'pdf2pic/dist/types/options';
+import { fromBuffer } from 'pdf2pic'
+import type { MultipartFile } from '@fastify/multipart'
+import type { Options } from 'pdf2pic/dist/types/options'
 
 type ImageProps = {
   filename: string
   buffer: Buffer
+}
+
+export interface ProcessedDocument {
+  customer:string,
+  supplier:string,
+  receiptValueInCents:number,
+  issValueInCents:number,
+  receiptNumber:string,
+  documentType:string,
+  issueDate:string,
+  accrualDate:string,
+}
+
+function generateCNPJ() {
+    const randomDigits = () => Math.floor(Math.random() * 10);
+    let cnpj = '';
+
+    // Generate the first 12 digits
+    for (let i = 0; i < 12; i++) {
+        cnpj += randomDigits();
+    }
+
+    // Calculate the first verification digit
+    let firstDigit = 0;
+    for (let i = 0; i < 12; i++) {
+        firstDigit += parseInt(cnpj[i]) * (5 + (i % 8));
+    }
+    firstDigit = (firstDigit % 11) < 2 ? 0 : 11 - (firstDigit % 11);
+    cnpj += firstDigit;
+
+    // Calculate the second verification digit
+    let secondDigit = 0;
+    for (let i = 0; i < 13; i++) {
+        secondDigit += parseInt(cnpj[i]) * (6 + (i % 8));
+    }
+    secondDigit = (secondDigit % 11) < 2 ? 0 : 11 - (secondDigit % 11);
+    cnpj += secondDigit;
+
+    // Format the CNPJ
+    return `${cnpj.slice(0, 2)}.${cnpj.slice(2, 5)}.${cnpj.slice(5, 8)}/${cnpj.slice(8, 12)}-${cnpj.slice(12)}`;
 }
 
 export async function convertPdfMessageToBase64(message: string){
@@ -55,17 +94,6 @@ export async function createFormDataFromFiles(files: string[]) {
   return form
 }
 
-// export async function createFormDataFromFilesOld(files: string[]) {
-//   const form = new FormData()
-//   for (const file of files) {
-//     const { filename, data } = JSON.parse(file)
-//     const base64Image = await convertPdfMessageToBase64(JSON.stringify(data))
-//     const buffer = Buffer.from(base64Image, 'base64')
-//     form.append('images', buffer, { filename })
-//   }
-//   return form
-// }
-
 export async function compressBase64Image(base64Image: string){
   const imgBuffer = Buffer.from(base64Image, 'base64')
   const compressedImageBuffer = await sharp(imgBuffer)
@@ -77,33 +105,24 @@ export async function compressBase64Image(base64Image: string){
   return compressedBase64
 }
 
-export function convertDate(dateStr: string) {
-  const brazilianDate = dateStr
-  const [day, month, year] = brazilianDate.split('/').map(Number)
-  const date = new Date(year, month - 1, day)
-  const isoDate = date.toISOString()
-
-  return isoDate
-}
-
-export async function processDocumentWithTextract(base64Image: string) {
+export async function processDocumentWithTextract(base64Image: string):Promise<ProcessedDocument> {
   const fakeDelay = Math.random() * 3000
   await new Promise(resolve => setTimeout(resolve, fakeDelay))
 
   return {
-    customer:'12345678900000',
-    supplier:'00000987654321',
-    receiptValueInCents:10000,
+    customer:generateCNPJ(),
+    supplier:generateCNPJ(),
+    receiptValueInCents:100 * (faker.commerce.price() as unknown as number),
+    issValueInCents:100 * (faker.commerce.price() as unknown as number),
     receiptNumber:'12345',
-    documentType:'77',
-    issueDate:'10/08/2024',
-    accrualDate:'10/08/2024',
+    documentType:DocumentType.NFES_SERVICOS_TERCEIROS,
+    issueDate:faker.date.recent().toISOString(),
+    accrualDate:faker.date.recent().toISOString(),
   }
 }
 const isMultipartFile = (value: unknown): value is MultipartFile => {
   return value instanceof File && value.size > 0;
 };
-
 
 type FileConvertProps = {
   file: MultipartFile,
