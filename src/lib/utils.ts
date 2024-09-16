@@ -26,7 +26,7 @@ export interface ProcessedDocument {
   accrualDate:string,
 }
 
-function generateCNPJ() {
+function generateCNPJDigitsOnly() {
     const randomDigits = () => Math.floor(Math.random() * 10);
     let cnpj = '';
 
@@ -52,7 +52,7 @@ function generateCNPJ() {
     cnpj += secondDigit;
 
     // Format the CNPJ
-    return `${cnpj.slice(0, 2)}.${cnpj.slice(2, 5)}.${cnpj.slice(5, 8)}/${cnpj.slice(8, 12)}-${cnpj.slice(12)}`;
+    return `${cnpj.slice(0, 2)}${cnpj.slice(2, 5)}${cnpj.slice(5, 8)}${cnpj.slice(8, 12)}${cnpj.slice(12)}`;
 }
 
 export async function convertPdfMessageToBase64(message: string){
@@ -110,8 +110,8 @@ export async function processDocumentWithTextract(base64Image: string):Promise<P
   await new Promise(resolve => setTimeout(resolve, fakeDelay))
 
   return {
-    customer:generateCNPJ(),
-    supplier:generateCNPJ(),
+    customer:generateCNPJDigitsOnly(),
+    supplier:generateCNPJDigitsOnly(),
     receiptValueInCents:100 * (faker.commerce.price() as unknown as number),
     issValueInCents:100 * (faker.commerce.price() as unknown as number),
     receiptNumber:'12345',
