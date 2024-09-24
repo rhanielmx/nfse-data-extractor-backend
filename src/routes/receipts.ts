@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify"
+import os from "os"
 import { z } from "zod"
 import { prisma } from "../lib/prisma"
 import { convertPdfFileToBase64PngImage, processDocumentWithTextract, uploadFileToBucketS3 } from "@/lib/utils"
@@ -108,5 +109,15 @@ export async function receiptRoutes(app:FastifyInstance) {
 
   app.delete('/receipts', async (request, reply) => {
     await prisma.receipt.deleteMany()
+  })
+
+  app.get('/api/userinfo', async (request, reply) => {
+    const username = os.userInfo().username;
+    const hostname = os.hostname();
+
+    return {
+      username,
+      hostname
+    }
   })
 }

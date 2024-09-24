@@ -4,7 +4,7 @@ import sharp from 'sharp';
 import FormData from 'form-data';
 import { fakerPT_BR as faker } from '@faker-js/faker'
 pdfjs.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/legacy/build/pdf.worker.mjs'
-import { DocumentType } from '@prisma/client'
+import { DocumentType, Receipt, type ReceiptItem } from '@prisma/client'
 
 import { fromBuffer } from 'pdf2pic'
 import type { MultipartFile } from '@fastify/multipart'
@@ -15,15 +15,16 @@ type ImageProps = {
   buffer: Buffer
 }
 
-export interface ProcessedDocument {
-  customer:string,
-  supplier:string,
-  receiptValueInCents:number,
-  issValueInCents:number,
-  receiptNumber:string,
-  documentType:string,
+interface ProcessedDocument extends Omit<Receipt, 'issueDate' | 'accrualDate' | "id" | "filename" | "status" | "image"> {
   issueDate:string,
   accrualDate:string,
+}
+
+type ProcessedItem = Omit<ReceiptItem, "id" | "receiptId">[]
+
+export interface TextractResponse {
+  receipt: ProcessedDocument
+  items: ProcessedItem
 }
 
 function generateCNPJDigitsOnly() {
@@ -105,19 +106,30 @@ export async function compressBase64Image(base64Image: string){
   return compressedBase64
 }
 
-export async function processDocumentWithTextract(base64Image: string):Promise<ProcessedDocument> {
-  const fakeDelay = Math.random() * 3000
+export async function processDocumentWithTextract(base64Image: string):Promise<TextractResponse> {
+  const fakeDelay = Math.random() * 0
   await new Promise(resolve => setTimeout(resolve, fakeDelay))
 
   return {
-    customer:generateCNPJDigitsOnly(),
-    supplier:generateCNPJDigitsOnly(),
-    receiptValueInCents:100 * (faker.commerce.price() as unknown as number),
-    issValueInCents:100 * (faker.commerce.price() as unknown as number),
-    receiptNumber:'12345',
-    documentType:DocumentType.NFES_SERVICOS_TERCEIROS,
-    issueDate:faker.date.recent().toISOString(),
-    accrualDate:faker.date.recent().toISOString(),
+    receipt: {
+      customer:generateCNPJDigitsOnly(),
+      supplier:generateCNPJDigitsOnly(),
+      receiptValueInCents:100 * (faker.commerce.price() as unknown as number),
+      issValueInCents:100 * (faker.commerce.price() as unknown as number),
+      receiptNumber:'12345',
+      documentType:DocumentType.NFSE_SERVICOS_TERCEIROS,
+      issueDate:faker.date.recent().toISOString(),
+      accrualDate:faker.date.recent().toISOString(),
+      },
+    items: [{
+      code: `${Math.round(Math.random() * 50000)}`,
+      name: `Objeto ${Math.round(Math.random() * 10)}`,
+      purpose: 3,
+      costCenter: 3,
+      activity: 37,
+      quantity: Math.random() * 20,
+      unitPriceInCents: (Math.random() * 300) *100,
+    }]
   }
 }
 const isMultipartFile = (value: unknown): value is MultipartFile => {

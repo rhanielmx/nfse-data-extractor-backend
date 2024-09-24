@@ -1,9 +1,13 @@
 import { env } from '@/env'
 import { prisma } from '@/lib/prisma'
+import type { TextractResponse } from '@/lib/utils'
 import amqp, { Channel, Connection } from 'amqplib'
 import type { FastifyInstance } from "fastify"
-
 let channel: Channel
+
+interface DataProps extends TextractResponse {
+  id: string
+}
 
 async function connectToRabbitMQ(queueName: string, exchangeName:string, keys:string[]) {
   const connection: Connection = await amqp.connect(env.RABBITMQ_URL)
@@ -18,9 +22,9 @@ async function consumeMessages(app: FastifyInstance, queueName:string, exchangeN
 
   channel.consume(queueName, async (message) => {
     if (message) { 
-      const data = JSON.parse(message.content.toString())
+      const data = JSON.parse(message.content.toString()) as DataProps
       const routingKey = message.fields.routingKey
-
+      
       switch(routingKey){
         case 'upload':
           const response = await app.inject({
@@ -49,9 +53,29 @@ async function consumeMessages(app: FastifyInstance, queueName:string, exchangeN
           if (receipt) {
             const updatedReceipt = await prisma.receipt.update({
               data: {
-                issueDate: new Date(data.issueDate),
-                accrualDate: new Date(data.accrualDate),
-                ...data
+                issueDate: new Date(data.receipt.issueDate),
+                accrualDate: new Date(data.receipt.accrualDate),
+                customer: data.receipt.customer,
+                supplier: data.receipt.supplier,
+                receiptValueInCents: data.receipt.receiptValueInCents,
+                issValueInCents: data.receipt.issValueInCents,
+                receiptNumber: data.receipt.receiptNumber,
+                documentType: data.receipt.documentType,  
+                items: {
+                  create: data.items.map(item => ({
+                    code: item.code,
+                    name: item.name,
+                    purpose: item.purpose,
+                    costCenter: item.costCenter,
+                    activity: item.activity,
+                    quantity: item.quantity,
+                    unitPriceInCents: item.unitPriceInCents
+                  }))
+                },
+                status: 'done',
+              },
+              include: {
+                items: true
               },
               where: {
                 id: data.id
@@ -60,7 +84,7 @@ async function consumeMessages(app: FastifyInstance, queueName:string, exchangeN
 
             app.websocketServer.clients.forEach((client) => {
               if(client.readyState === client.OPEN) {
-                client.send(JSON.stringify({kind:'PROCESS',data:updatedReceipt}))
+                client.send(JSON.stringify({kind:'PROCESS',data: updatedReceipt}))
               }
             })
           }

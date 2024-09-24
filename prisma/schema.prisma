@@ -35,7 +35,24 @@ model Receipt {
   documentType        DocumentType?
   issueDate           DateTime?
   accrualDate         DateTime?
+  items               ReceiptItem[]
 
   // @@unique([supplier, receiptNumber])
   @@map("receipts")
+}
+
+model ReceiptItem {
+  id               Int    @id @default(autoincrement())
+  code             String
+  name             String
+  purpose          Int
+  costCenter       Int
+  activity         Int
+  quantity         Int
+  unitPriceInCents Int
+
+  receipt   Receipt @relation(fields: [receiptId], references: [id])
+  receiptId String
+
+  @@map("receipt_items")
 }
