@@ -2,6 +2,7 @@ import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { createCanvas } from 'canvas';
 import sharp from 'sharp';
 import FormData from 'form-data';
+import { randomUUID } from 'node:crypto'
 import { fakerPT_BR as faker } from '@faker-js/faker'
 pdfjs.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/legacy/build/pdf.worker.mjs'
 import { DocumentType, Receipt, type ReceiptItem } from '@prisma/client'
@@ -129,9 +130,18 @@ export async function processDocumentWithTextract(base64Image: string):Promise<T
       activity: 37,
       quantity: Math.random() * 20,
       unitPriceInCents: (Math.random() * 300) *100,
+    },{
+      code: `${Math.round(Math.random() * 50000)}`,
+      name: `Objeto ${Math.round(Math.random() * 10)}`,
+      purpose: 3,
+      costCenter: 3,
+      activity: 37,
+      quantity: Math.random() * 20,
+      unitPriceInCents: (Math.random() * 300) *100,
     }]
   }
 }
+
 const isMultipartFile = (value: unknown): value is MultipartFile => {
   return value instanceof File && value.size > 0;
 };

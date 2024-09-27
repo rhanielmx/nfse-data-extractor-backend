@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyRequest } from "fastify"
 import os from "os"
 import { z } from "zod"
+import { Builder } from 'xml2js'
 import { prisma } from "../lib/prisma"
 import { convertPdfFileToBase64PngImage, processDocumentWithTextract, uploadFileToBucketS3 } from "@/lib/utils"
 
@@ -9,6 +10,7 @@ interface ImageProps {
   image: string
   status: 'processing' | 'finished'
  }
+
 
 export async function receiptRoutes(app:FastifyInstance) {
   app.get('/receipts', async (request, reply) => {
@@ -119,5 +121,31 @@ export async function receiptRoutes(app:FastifyInstance) {
       username,
       hostname
     }
+  })
+
+  app.post('/convert-to-xml', async (request, reply) => {
+    const jsonSchema = z.array(z.object({
+      id: z.string().uuid(),
+      filename: z.string(),
+      items: z.array(z.object({
+        id: z.string(),
+        code: z.coerce.number()
+      }))
+    }))
+    const data = request.body
+    console.log('[CONVERT]',data)
+
+    const builder = new Builder({
+      rootName: 'root',
+      headless: true,
+      renderOpts: { pretty: true }
+    })
+
+    const xmlData = builder.buildObject(data)
+
+    reply.header('Content-Type', 'application/xml')
+    reply.header('Content-Disposition', 'attachment; filename=output.xml')
+    console.log(xmlData)
+    reply.send(xmlData)
   })
 }
