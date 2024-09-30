@@ -25,7 +25,7 @@ async function consumeMessages(app: FastifyInstance, queueName:string, exchangeN
       const data = JSON.parse(message.content.toString()) as DataProps
       const routingKey = message.fields.routingKey
       
-      switch(routingKey){
+      switch(routingKey) {
         case 'upload':
           const response = await app.inject({
             url: '/receipts',
@@ -84,7 +84,7 @@ async function consumeMessages(app: FastifyInstance, queueName:string, exchangeN
 
             app.websocketServer.clients.forEach((client) => {
               if(client.readyState === client.OPEN) {
-                client.send(JSON.stringify({kind:'PROCESS',data: updatedReceipt}))
+                client.send(JSON.stringify({kind:'PROCESS', data: updatedReceipt}))
               }
             })
           }

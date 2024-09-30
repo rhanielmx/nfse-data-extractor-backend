@@ -3,7 +3,10 @@ import os from "os"
 import { z } from "zod"
 import { Builder } from 'xml2js'
 import { prisma } from "../lib/prisma"
-import { convertPdfFileToBase64PngImage, processDocumentWithTextract, uploadFileToBucketS3 } from "@/lib/utils"
+import { convertPdfFileToBase64PngImage, getPythonData, processDocumentWithTextract, uploadFileToBucketS3 } from "@/lib/utils"
+import { spawn } from 'node:child_process'
+import { createWriteStream } from 'node:fs'
+import { join } from 'node:path'
 
 interface ImageProps {
   filename: string
@@ -25,10 +28,22 @@ export async function receiptRoutes(app:FastifyInstance) {
  
     for await (const file of request.files()) {
       const filename = file.filename.replace('pdf', 'png')
+      try {          
+        const tempFilePath = file.filename
+        const writeStream = createWriteStream(tempFilePath)
+        await file.file.pipe(writeStream) // Pipe the file stream to 
+        
+        const a = getPythonData('convert2base64.py', tempFilePath, console.log)
+        console.log(a)
+      } catch(err) {
+        console.log('[Error]', err)
+      }
       
       const { buffer } = await convertPdfFileToBase64PngImage({
         file
       })
+
+
       const { imageUrl } = await uploadFileToBucketS3(buffer!, filename)
 
       images.push({

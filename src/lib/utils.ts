@@ -107,43 +107,47 @@ export async function compressBase64Image(base64Image: string){
   return compressedBase64
 }
 
-export async function processDocumentWithTextract(base64Image: string):Promise<TextractResponse> {
+//TODO - Remove mock when finished with dev
+export async function processDocumentWithTextract(imageUrl: string, mock=true):Promise<TextractResponse | undefined> {
   const fakeDelay = Math.random() * 0
   await new Promise(resolve => setTimeout(resolve, fakeDelay))
-
-  return {
-    receipt: {
-      customer:generateCNPJDigitsOnly(),
-      supplier:generateCNPJDigitsOnly(),
-      receiptValueInCents:100 * (faker.commerce.price() as unknown as number),
-      issValueInCents:100 * (faker.commerce.price() as unknown as number),
-      receiptNumber:'12345',
-      documentType:DocumentType.NFSE_SERVICOS_TERCEIROS,
-      issueDate:faker.date.recent().toISOString(),
-      accrualDate:faker.date.recent().toISOString(),
-      },
-    items: [{
-      code: `${Math.round(Math.random() * 50000)}`,
-      name: `Objeto ${Math.round(Math.random() * 10)}`,
-      purpose: 3,
-      costCenter: 3,
-      activity: 37,
-      quantity: Math.random() * 20,
-      unitPriceInCents: (Math.random() * 300) *100,
-    },{
-      code: `${Math.round(Math.random() * 50000)}`,
-      name: `Objeto ${Math.round(Math.random() * 10)}`,
-      purpose: 3,
-      costCenter: 3,
-      activity: 37,
-      quantity: Math.random() * 20,
-      unitPriceInCents: (Math.random() * 300) *100,
-    }]
+  
+  
+  if (mock){
+    return {
+      receipt: {
+        customer: generateCNPJDigitsOnly(),
+        supplier: generateCNPJDigitsOnly(),
+        receiptValueInCents: 100 * (faker.commerce.price() as unknown as number),
+        issValueInCents: 100 * (faker.commerce.price() as unknown as number),
+        receiptNumber: '12345',
+        documentType: DocumentType.NFSE_SERVICOS_TERCEIROS,
+        issueDate: faker.date.recent().toISOString(),
+        accrualDate: faker.date.recent().toISOString(),
+        },
+      items: [{
+        code: `${Math.round(Math.random() * 50000)}`,
+        name: `Objeto ${Math.round(Math.random() * 10)}`,
+        purpose: 3,
+        costCenter: 3,
+        activity: 37,
+        quantity: Math.random() * 20,
+        unitPriceInCents: (Math.random() * 300) *100,
+      }, {
+        code: `${Math.round(Math.random() * 50000)}`,
+        name: `Objeto ${Math.round(Math.random() * 10)}`,
+        purpose: 3,
+        costCenter: 3,
+        activity: 37,
+        quantity: Math.random() * 20,
+        unitPriceInCents: (Math.random() * 300) *100,
+      }]
+    }
   }
 }
 
 const isMultipartFile = (value: unknown): value is MultipartFile => {
-  return value instanceof File && value.size > 0;
+  return value instanceof File && value.size > 0
 };
 
 type FileConvertProps = {
@@ -184,4 +188,28 @@ export async function uploadFileToBucketS3(file: Buffer, filename: string, bucke
     data,
     imageUrl: `https://${bucketName}.s3.us-east-2.amazonaws.com/${filename}`
   }
+}
+
+import { spawn } from 'node:child_process'
+
+export function getPythonData(scriptPath: string, args: any, callback: typeof console.log) {
+    console.log(args)
+    const pythonProcess = spawn('python3', [scriptPath, ...args])
+
+    let data = ''
+    pythonProcess.stdout.on('data', (chunk) => {
+        data += chunk.toString()
+    })
+
+    pythonProcess.stderr.on('data', (error) => {
+        console.error(`stderr: ${error}`)
+    })
+
+    pythonProcess.on('close', (code) => {
+        if (code !== 0) {
+            callback(`Error: Script exited with code ${code}`, null)
+        } else {
+            callback(null, data)
+        }
+    });
 }
