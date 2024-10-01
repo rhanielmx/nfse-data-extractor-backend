@@ -3,8 +3,7 @@ import os from "os"
 import { z } from "zod"
 import { Builder } from 'xml2js'
 import { prisma } from "../lib/prisma"
-import { convertPdfFileToBase64PngImage, getPythonData, processDocumentWithTextract, uploadFileToBucketS3 } from "@/lib/utils"
-import { spawn } from 'node:child_process'
+import { uploadReceiptDocumentToBucket, processDocumentWithTextract } from "@/lib/utils"
 import { createWriteStream } from 'node:fs'
 import { join } from 'node:path'
 
@@ -13,7 +12,6 @@ interface ImageProps {
   image: string
   status: 'processing' | 'finished'
  }
-
 
 export async function receiptRoutes(app:FastifyInstance) {
   app.get('/receipts', async (request, reply) => {
@@ -28,23 +26,24 @@ export async function receiptRoutes(app:FastifyInstance) {
  
     for await (const file of request.files()) {
       const filename = file.filename.replace('pdf', 'png')
-      try {          
-        const tempFilePath = file.filename
+      let data
+      // try {          
+        const tempFilePath = join("./tmp", file.filename)
         const writeStream = createWriteStream(tempFilePath)
-        await file.file.pipe(writeStream) // Pipe the file stream to 
+        file.file.pipe(writeStream)
         
-        const a = getPythonData('convert2base64.py', tempFilePath, console.log)
-        console.log(a)
-      } catch(err) {
-        console.log('[Error]', err)
-      }
+        const imageUrl = await uploadReceiptDocumentToBucket('src/scripts/external/pipeline.py', [tempFilePath])
+        // console.log('[Data]', result)
+
+      // } catch(err) {
+      //   console.log('[Error]', err)
+      // }
       
-      const { buffer } = await convertPdfFileToBase64PngImage({
-        file
-      })
+      // const { buffer } = await convertPdfFileToBase64PngImage({
+      //   file
+      // })
 
-
-      const { imageUrl } = await uploadFileToBucketS3(buffer!, filename)
+      // const { imageUrl } = await uploadFileToBucketS3(buffer!, filename)
 
       images.push({
         filename,

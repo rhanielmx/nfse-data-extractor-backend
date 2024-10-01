@@ -1,7 +1,7 @@
 node_modules
+tmp
+__pycache__
 # Keep environment variables out of version control
 .env
-
 teste.*
-
 *.db*
