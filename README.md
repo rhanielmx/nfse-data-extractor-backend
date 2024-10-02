@@ -46,4 +46,3 @@ Para usar o nfse-data-extractor-backend, inicie o serviços do docker e, em segu
 docker compose up -d
 npm run dev
 ```
-
