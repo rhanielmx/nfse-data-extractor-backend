@@ -25,8 +25,8 @@ Essas foram as principais tecnologias utilizadas no desenvolvimento do projeto.
 
 Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
-- Ter instalado [Docker]([Docker: Accelerated Container Application Development](https://www.docker.com/)) e [RabbitMQ]([RabbitMQ: One broker to queue them all | RabbitMQ](https://www.rabbitmq.com/)) em versões compatíveis com as utilizadas pelo projeto. 
-- Ter instalado o [poppler]([Belval/pdf2image: A python module that wraps the pdftoppm utility to convert PDF to PIL Image object (github.com)](https://github.com/Belval/pdf2image)) . Requisito da biblioteca pdf2image.git
+- Ter instalado [Docker](https://www.docker.com/) e [RabbitMQ](https://www.rabbitmq.com/) em versões compatíveis com as utilizadas pelo projeto. 
+- Ter instalado o [poppler](https://github.com/Belval/pdf2image). Requisito da biblioteca pdf2image.git
 Linux e macOS:
 
 ```
