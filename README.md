@@ -25,10 +25,12 @@ Essas foram as principais tecnologias utilizadas no desenvolvimento do projeto.
 
 Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
-- Ter instalado [Docker](https://www.docker.com/) e [RabbitMQ](https://www.rabbitmq.com/) em versões compatíveis com as utilizadas pelo projeto. 
-- Ter instalado o [poppler](https://github.com/Belval/pdf2image). Requisito da biblioteca pdf2image.git
-Linux e macOS:
+- Ter instalado [Docker]([Docker: Accelerated Container Application Development](https://www.docker.com/)) e [RabbitMQ]([RabbitMQ: One broker to queue them all | RabbitMQ](https://www.rabbitmq.com/)) em versões compatíveis com as utilizadas pelo projeto. 
+- Ter instalado o [poppler]([Belval/pdf2image: A python module that wraps the pdftoppm utility to convert PDF to PIL Image object (github.com)](https://github.com/Belval/pdf2image)) . Requisito da biblioteca pdf2image.git
 
+## 🚀 Instalando
+
+Para instalar o nfse-data-extractor-backend, execute os comandos abaixo:
 ```
 git clone https://github.com/rhanielmx/nfse-data-extractor-backend
 cd nfse-data-extractor-backend
@@ -38,10 +40,9 @@ pip install boto3==1.35.30 pdf2image==1.17.0
 
 ## ☕ Usando
 
-Para usar o nfse-data-extractor-backend, siga estas etapas:
+Para usar o nfse-data-extractor-backend, inicie o serviços do docker e, em seguida, o servidor node como demonstrado abaixo:
 
 ```
 docker compose up -d
 npm run dev
 ```
-
