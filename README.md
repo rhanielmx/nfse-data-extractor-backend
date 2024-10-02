@@ -36,12 +36,6 @@ npm install
 pip install boto3==1.35.30 pdf2image==1.17.0
 ```
 
-Windows:
-
-```
-<comando_de_instalação>
-```
-
 ## ☕ Usando
 
 Para usar o nfse-data-extractor-backend, siga estas etapas:
