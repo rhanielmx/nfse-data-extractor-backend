@@ -10,7 +10,6 @@ O desenvolvimento do projeto ainda não foi finalizado e os próximos passos pla
 
 ## 💻 Tecnologias
 
-
 Essas foram as principais tecnologias utilizadas no desenvolvimento do projeto.
 
 | Tecnologia | Versão        |
