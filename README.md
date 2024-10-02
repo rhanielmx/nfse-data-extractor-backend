@@ -26,13 +26,9 @@ Essas foram as principais tecnologias utilizadas no desenvolvimento do projeto.
 Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
 - Ter instalado [Docker](https://www.docker.com/) e [RabbitMQ](https://www.rabbitmq.com/) em versões compatíveis com as utilizadas pelo projeto. 
-- Ter instalado o [poppler](https://github.com/Belval/pdf2image). Requisito da biblioteca pdf2image.
+- Ter instalado o [poppler](https://github.com/Belval/pdf2image). Requisito da biblioteca pdf2image.git
+Linux e macOS:
 
-## 🚀 Instalando
-
-Para instalar o nfse-extractor-backend, siga estas etapas:
-
-Para instalar o nfse-data-extractor-backend, execute os comandos abaixo:
 ```
 git clone https://github.com/rhanielmx/nfse-data-extractor-backend
 cd nfse-data-extractor-backend
