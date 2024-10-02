@@ -32,6 +32,7 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
 Para instalar o nfse-extractor-backend, siga estas etapas:
 
+Para instalar o nfse-data-extractor-backend, execute os comandos abaixo:
 ```
 git clone https://github.com/rhanielmx/nfse-data-extractor-backend
 cd nfse-data-extractor-backend
@@ -41,7 +42,7 @@ pip install boto3==1.35.30 pdf2image==1.17.0
 
 ## ☕ Usando
 
-Para usar o nfse-data-extractor-backend, siga estas etapas:
+Para usar o nfse-data-extractor-backend, inicie o serviços do docker e, em seguida, o servidor node como demonstrado abaixo:
 
 ```
 docker compose up -d
